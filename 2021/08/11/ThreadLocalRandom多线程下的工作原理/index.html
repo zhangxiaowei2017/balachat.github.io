@@ -79,15 +79,15 @@
 
 
 
-<meta name="description" content="​     首先我们在学习ThreadLocalRandom的工作原理之前，我们先要复习一下Random的工作原理，所谓的工作原理，指的是在多线程的条件下，每个线程如何生成属于当前线程的随机数。通过学习ThreadLocalRandom来了解ThreadLocalRandom能够为我们解决什么问题，还能帮助了解Random的缺点和不足之处在哪里。 1 通过Random类获取随机数我们选择Rando">
+<meta name="description" content="首先我们在学习ThreadLocalRandom的工作原理之前，我们先要复习一下Random的工作原理，所谓的工作原理，指的是在多线程的条件下，每个线程如何生成属于当前线程的随机数。通过学习ThreadLocalRandom来了解ThreadLocalRandom能够为我们解决什么问题，还能帮助了解Random的缺点和不足之处在哪里。  通过Random类获取随机数 我们选择Random比较典型">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ThreadLocalRandom多线程下的工作原理">
 <meta property="og:url" content="https://zhangxiaowei2017.github.io/2021/08/11/ThreadLocalRandom%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8B%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="​     首先我们在学习ThreadLocalRandom的工作原理之前，我们先要复习一下Random的工作原理，所谓的工作原理，指的是在多线程的条件下，每个线程如何生成属于当前线程的随机数。通过学习ThreadLocalRandom来了解ThreadLocalRandom能够为我们解决什么问题，还能帮助了解Random的缺点和不足之处在哪里。 1 通过Random类获取随机数我们选择Rando">
+<meta property="og:description" content="首先我们在学习ThreadLocalRandom的工作原理之前，我们先要复习一下Random的工作原理，所谓的工作原理，指的是在多线程的条件下，每个线程如何生成属于当前线程的随机数。通过学习ThreadLocalRandom来了解ThreadLocalRandom能够为我们解决什么问题，还能帮助了解Random的缺点和不足之处在哪里。  通过Random类获取随机数 我们选择Random比较典型">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-08-11T14:43:22.000Z">
-<meta property="article:modified_time" content="2021-08-12T00:08:37.899Z">
+<meta property="article:modified_time" content="2021-08-13T15:34:10.888Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 
@@ -359,8 +359,12 @@
       
 
       
-        <p>​     首先我们在学习ThreadLocalRandom的工作原理之前，我们先要复习一下Random的工作原理，所谓的工作原理，指的是在多线程的条件下，每个线程如何生成属于当前线程的随机数。通过学习ThreadLocalRandom来了解ThreadLocalRandom能够为我们解决什么问题，还能帮助了解Random的缺点和不足之处在哪里。</p>
-<h3 id="1-通过Random类获取随机数"><a href="#1-通过Random类获取随机数" class="headerlink" title="1 通过Random类获取随机数"></a>1 通过Random类获取随机数</h3><p>我们选择Random比较典型的方法nextInt方法来完成随机数的生成，至于其他具有上下限的随机数生成器，或者指定大小的随机数生成器，或者流式的随机数生成器，都离不开Random的nextInt方法，确切的说，最终底层生成随机数的方式都是调用nextInt方法生成的，也就是说nextInt是生成随机数的核心方法。Random类下的其他的随机数生成方法都是基于nextInt方法做了一些定制性的开发.</p>
+        <blockquote>
+<p>首先我们在学习ThreadLocalRandom的工作原理之前，我们先要复习一下Random的工作原理，所谓的工作原理，指的是在多线程的条件下，每个线程如何生成属于当前线程的随机数。通过学习ThreadLocalRandom来了解ThreadLocalRandom能够为我们解决什么问题，还能帮助了解Random的缺点和不足之处在哪里。</p>
+</blockquote>
+<h3 id="通过Random类获取随机数"><a href="#通过Random类获取随机数" class="headerlink" title="通过Random类获取随机数"></a>通过Random类获取随机数</h3><blockquote>
+<p>我们选择Random比较典型的方法nextInt方法来完成随机数的生成，至于其他具有上下限的随机数生成器，或者指定大小的随机数生成器，或者流式的随机数生成器，都离不开Random的nextInt方法，确切的说，最终底层生成随机数的方式都是调用nextInt方法生成的，也就是说nextInt是生成随机数的核心方法。Random类下的其他的随机数生成方法都是基于nextInt方法做了一些定制性的开发.</p>
+</blockquote>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">randomTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Random属于线程安全, 内部使用CAS实现，保证原子性的更新种子。</span></span><br><span class="line">    Random random = <span class="keyword">new</span> Random(<span class="number">1</span>);</span><br><span class="line">    Stream.of(<span class="number">1</span>,<span class="number">2</span>).map(i -&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> num = <span class="number">0</span>; num &lt; <span class="number">3</span>; num++) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">int</span> randomNum = random.nextInt();</span><br><span class="line">                String threadName = Thread.currentThread().getName();</span><br><span class="line">                logger.info(<span class="string">&quot;current &#123;&#125; print random value is &#123;&#125;&quot;</span>, threadName, randomNum);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;,<span class="string">&quot;thread-&quot;</span> + i);</span><br><span class="line">    &#125;).forEach(t -&gt; &#123;</span><br><span class="line">        t.start();</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Thread.sleep(<span class="number">10000</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">23</span>:<span class="number">02</span>:<span class="number">54.572</span> [thread-<span class="number">1</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread-<span class="number">1</span> print random value is -<span class="number">1155869325</span></span><br><span class="line"><span class="number">23</span>:<span class="number">02</span>:<span class="number">54.572</span> [thread-<span class="number">2</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread-<span class="number">2</span> print random value is <span class="number">431529176</span></span><br><span class="line"><span class="number">23</span>:<span class="number">02</span>:<span class="number">55.584</span> [thread-<span class="number">2</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread-<span class="number">2</span> print random value is <span class="number">1749940626</span></span><br><span class="line"><span class="number">23</span>:<span class="number">02</span>:<span class="number">55.584</span> [thread-<span class="number">1</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread-<span class="number">1</span> print random value is <span class="number">1761283695</span></span><br><span class="line"><span class="number">23</span>:<span class="number">02</span>:<span class="number">56.589</span> [thread-<span class="number">1</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread-<span class="number">1</span> print random value is <span class="number">155629808</span></span><br><span class="line"><span class="number">23</span>:<span class="number">02</span>:<span class="number">56.589</span> [thread-<span class="number">2</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread-<span class="number">2</span> print random value is <span class="number">892128508</span></span><br></pre></td></tr></table></figure>
@@ -368,8 +372,12 @@
 <blockquote>
 <p>以上示例，我们开了2个线程，每个线程执行for循环3次，每次调用Random实例获取一个随机数，当然你本地运行的情况和我本机运行的情况得到的随机数整体的数值是一样的，但是日志打印的线程获取的随机数的顺序是不一样的。</p>
 </blockquote>
-<p>那么就让我们进入nextInt方法一探究竟吧</p>
+<blockquote>
+<p>那么就让我们进入nextInt方法一探究竟</p>
+</blockquote>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public int nextInt() &#123;</span><br><span class="line">    return next(32);  // nextInt方法调用的是next(32)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">next</span><span class="params">(<span class="keyword">int</span> bits)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> oldseed, nextseed;</span><br><span class="line">        AtomicLong seed = <span class="keyword">this</span>.seed;  <span class="comment">// 1</span></span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            oldseed = seed.get(); <span class="comment">// 2</span></span><br><span class="line">            nextseed = (oldseed * multiplier + addend) &amp; mask;  <span class="comment">// 3</span></span><br><span class="line">        &#125; <span class="keyword">while</span> (!seed.compareAndSet(oldseed, nextseed));  <span class="comment">// 4</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">int</span>)(nextseed &gt;&gt;&gt; (<span class="number">48</span> - bits));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
@@ -379,8 +387,53 @@
 <p>​     进入下一轮循环的线程，将再次读取seed种子值，然后抢占执行seed.compareAndSet方法，第一个执行成功的线程，将跳出循环，结束next方法，未执行compareAndSet方法的线程继续进入下一轮循环，以此类推，直到所有的线程都执行seed.compareAndSet方法成功。其实我们也发现了，一轮do while循环只能保证一个线程能够执行seed.compareAndSet方法成功。其他线程将执行失败，进入下一轮do while循环。</p>
 <p>​     所有我们发现，在线程数量较多的情况下，竞争程度也逐渐加大，会导致某些线程长时间在执行do while循环，消耗cpu。当然，在实际开发中，如果没有特别高的并发的量的话，使用Random也是完全没有问题的，cpu压力也不是很大。</p>
 </blockquote>
+<blockquote>
 <p>不过jdk大叔，并没有停止于Random上，为了减少这种cas的竞争， jdk大叔又发明了ThreadLocalRandom类，来解决多线情况下的线程竞争问题。</p>
-<h3 id="2-ThreadLocalRandom"><a href="#2-ThreadLocalRandom" class="headerlink" title="2. ThreadLocalRandom"></a>2. ThreadLocalRandom</h3>
+</blockquote>
+<h3 id="ThreadLocalRandom"><a href="#ThreadLocalRandom" class="headerlink" title="ThreadLocalRandom"></a>ThreadLocalRandom</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">threadLocalRandom</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   threadLocalRandomTest(<span class="string">&quot;thread-01&quot;</span>);</span><br><span class="line">   threadLocalRandomTest(<span class="string">&quot;thread-02&quot;</span>);</span><br><span class="line">   threadLocalRandomTest(<span class="string">&quot;thread-03&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">threadLocalRandomTest</span><span class="params">(String threadName)</span> </span>&#123;</span><br><span class="line">    Thread t3 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();</span><br><span class="line">        logger.info(<span class="string">&quot;current thread &#123;&#125; local random object is &#123;&#125;&quot;</span>, Thread.currentThread().getName(), threadLocalRandom);</span><br><span class="line">        <span class="keyword">int</span> randomValue = threadLocalRandom.nextInt(<span class="number">10</span>, <span class="number">20</span>);</span><br><span class="line">        logger.info(<span class="string">&quot;current thread &#123;&#125; random value is &#123;&#125;&quot;</span>, Thread.currentThread().getName(),randomValue);</span><br><span class="line">    &#125;, threadName);</span><br><span class="line">    t3.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">22</span>:<span class="number">48</span>:<span class="number">50.009</span> [thread-<span class="number">03</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread thread-<span class="number">03</span> local random object is java.util.concurrent.ThreadLocalRandom@5d337871</span><br><span class="line"><span class="number">22</span>:<span class="number">48</span>:<span class="number">50.019</span> [thread-<span class="number">03</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread thread-<span class="number">03</span> random value is <span class="number">14</span></span><br><span class="line"><span class="number">22</span>:<span class="number">48</span>:<span class="number">50.009</span> [thread-<span class="number">02</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread thread-<span class="number">02</span> local random object is java.util.concurrent.ThreadLocalRandom@5d337871</span><br><span class="line"><span class="number">22</span>:<span class="number">48</span>:<span class="number">50.009</span> [thread-<span class="number">01</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread thread-<span class="number">01</span> local random object is java.util.concurrent.ThreadLocalRandom@5d337871</span><br><span class="line"><span class="number">22</span>:<span class="number">48</span>:<span class="number">50.021</span> [thread-<span class="number">02</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread thread-<span class="number">02</span> random value is <span class="number">16</span></span><br><span class="line"><span class="number">22</span>:<span class="number">48</span>:<span class="number">50.021</span> [thread-<span class="number">01</span>] INFO com.balachat.balachattensflow.blog.juc.ThreadLocalRandomStudyTest - current thread thread-<span class="number">01</span> random value is <span class="number">14</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面当我们在每个线程中执行ThreadLocalRandom.current方法时,此方法返回的是一个单例对象，ThreadLocalRandom首先会判断当前线程的threadLocalRandomProbe字段的值是否为0，当threadLocalRandomProbe为0的时候， 就会初始化当前线程threadLocalRandomSeed字段和threadLocalRandomProbe字段，这两个字段会在计算随机数的时候使用到。判断threadLocalRandomProbe的代码如下：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ThreadLocalRandom <span class="title">current</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (U.getInt(Thread.currentThread(), PROBE) == <span class="number">0</span>) <span class="comment">// 1</span></span><br><span class="line">           localInit(); <span class="comment">// 2</span></span><br><span class="line">       <span class="keyword">return</span> instance;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1 就是判断当前线程的threadLocalRandomProbe字段值是否为0.</p>
+<p>2 如果threadLocalRandomProbe为0，则对当前线程的的生成随机数相关的字段作初始化。</p>
+<p>3 返回ThreadLocalRandom实例。</p>
+<p>对线程相关的随机数字段初始化的方法如下：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">localInit</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> p = probeGenerator.addAndGet(PROBE_INCREMENT);</span><br><span class="line">        <span class="keyword">int</span> probe = (p == <span class="number">0</span>) ? <span class="number">1</span> : p; <span class="comment">// skip 0</span></span><br><span class="line">        <span class="keyword">long</span> seed = mix64(seeder.getAndAdd(SEEDER_INCREMENT));</span><br><span class="line">        Thread t = Thread.currentThread();</span><br><span class="line">        U.putLong(t, SEED, seed);  <span class="comment">// 1</span></span><br><span class="line">        U.putInt(t, PROBE, probe);  <span class="comment">// 2</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1 初始化线程的随机数种子。</p>
+<p>2 初始化线程的随机数探测值。</p>
+</blockquote>
+<blockquote>
+<p>分析上面的逻辑之后，我们就看下ThreadLocalRandom的nextInt方法的实现:</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">nextInt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> mix32(nextSeed());  <span class="comment">// 1</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">long</span> <span class="title">nextSeed</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Thread t; <span class="keyword">long</span> r; <span class="comment">// read and update per-thread seed</span></span><br><span class="line">        U.putLong(t = Thread.currentThread(), SEED,</span><br><span class="line">                  r = U.getLong(t, SEED) + GAMMA); <span class="comment">// 2</span></span><br><span class="line">        <span class="keyword">return</span> r;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>1 nextSeed方法用来生成随机数的种子。</p>
+<p>2 putLong方法的第一个参数就是当前线程，第二个参数就是当前线程的种子字段值的地址在当前线程对象的中的内存偏移量，第三个参数就是根据当前线程的种子节点生成的当前线程的下一个种子节点。</p>
+<p>U.getLong(t,SEED) + GAMMA的值就是新的种子节点nextSeed，U.putLong方法的含义就是把当前线程的内存为SEED位置的值更新为nextSeed.</p>
+<p>当程序拿到线程的下一个种子seed的时候，再调用mix32方法根据种子节点seed生成int类型的随机数。</p>
+</blockquote>
+<blockquote>
+<p>通过对上面的分析，我们可以体会到这样做的好处如下：</p>
+<ol>
+<li>不同线程之间不会存在对公共资源种子节点的互斥性访问，其实也就不存在线程之间的对共享资源访问的竞争了。因为ThreadLocalRandom把对种子节点的访问下沉到每个线程的本地空间中。每个线程只操作自己的种子，线程之前对彼此的种子不可见，所以种子就成了一种局部化和本地化的资源。所以我想这也是为什么叫ThreadLocalRandom的原因，线程本地化随机数。</li>
+<li>从设计的角度来讲，ThreadLocalRandom更像是一个对Thread管理的容器，管理着每个线程对随机数生成的规则，ThreadLocalRandom把变动的交给每个线程，把不变的交给自己，比如变动的种子，变动的探针，变动的交到Thread中，而生成随机数的规则是不变的，这些规则则由ThreadLocalRandom来实现。具体的体现就是mix32方法属于生成随机数的规则，而nextSeed方法生成的下一个种子，则由每个Thread的种子字段值来决定，nextSeed方法只是提供了一种生成种子的规则。</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>写到这里，便不由自主的想到一句话，叫：各人自扫门前雪，莫管他人瓦上霜。ThreadLocalRandom也是这么个味道。</p>
+<p>以上就是我对Random和ThreadLocalRandom的认识。不足之处，请多多指教。微信号：zhangxiaoweicheng。</p>
+</blockquote>
+
       
     </div>
     
@@ -400,26 +453,6 @@
       
       
 
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2021/08/07/helloword/" rel="next" title="helloword">
-                <i class="fa fa-chevron-left"></i> helloword
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2021/08/12/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="prev" title="多线程">
-                多线程 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
       
 
       
@@ -493,7 +526,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">1</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -530,7 +563,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%80%9A%E8%BF%87Random%E7%B1%BB%E8%8E%B7%E5%8F%96%E9%9A%8F%E6%9C%BA%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">1 通过Random类获取随机数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-ThreadLocalRandom"><span class="nav-number">2.</span> <span class="nav-text">2. ThreadLocalRandom</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87Random%E7%B1%BB%E8%8E%B7%E5%8F%96%E9%9A%8F%E6%9C%BA%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">通过Random类获取随机数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocalRandom"><span class="nav-number">2.</span> <span class="nav-text">ThreadLocalRandom</span></a></li></ol></div>
             
 
           </div>
